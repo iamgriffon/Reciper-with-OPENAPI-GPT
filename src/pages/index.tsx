@@ -1,6 +1,6 @@
 import { RecipeTag } from "@/components/recipe_tag";
 import type { NextPage } from "next";
-import { FormEvent, useState } from "react";
+import { FormEvent, ReactNode, useState } from "react";
 
 type Ingredient = {
   ingredient: string;
@@ -13,21 +13,27 @@ const Home: NextPage = () => {
 
   function deleteIngredient(index: number) {
     const toBeDeleted = index;
-    const newArray = ingredients.filter((_, index) => index !== toBeDeleted);
-    setIngredients(newArray);
+    setIngredients((prevState) => {
+      return [...prevState].filter((_, index) => index !== toBeDeleted);
+    });
   }
 
   function addIngredient(Event: FormEvent) {
     Event.preventDefault();
     if (!input) alert("Please enter a valid ingredient");
     else {
- 
-      const normalizedArray = input      //Normalizing our Inputs and removing duplicate values
+      const normalizedArray = input //Normalizing our Inputs and removing duplicate values
         .split(",")
-        .map((inputs) => inputs[0]?.toUpperCase() + inputs.substring(1).trim().toLowerCase());
+        .map((inputs) => {
+          const NO_SPACES_AND_DOTS = inputs.trimStart().replace(/\./g, " ");
+          const CAPITALIZE =
+            NO_SPACES_AND_DOTS.charAt(0).toUpperCase() +
+            NO_SPACES_AND_DOTS.slice(1);
+          return CAPITALIZE;
+        });
+
       const recipeInputs = Array.from(new Set(normalizedArray));
-     
-      recipeInputs.forEach((input) => {  //Avoiding duplicates from what has been already entered
+      recipeInputs.forEach((input) => {
         const newIngredient = input;
         if (!ingredients.find((unique) => unique.ingredient == newIngredient)) {
           setIngredients((prevState) => {
@@ -39,7 +45,7 @@ const Home: NextPage = () => {
               },
             ];
           });
-        };
+        }
       });
     }
     setInput("");
@@ -56,8 +62,14 @@ const Home: NextPage = () => {
 
   return (
     <div>
-      <header>
-        <h1 className="text-zinc-500">Just a test</h1>
+      <header className="items-center justify-center flex flex-col">
+        <h1 className="text-2xl font-bold mb-3">
+          Please insert your ingredients in the box
+        </h1>
+        <em>
+          Make sure to separate them by <strong>commas</strong> (,)
+        </em>
+        <em>Example: {'"Banana, Avocado, Milk, Sugar, Cereal" etc'}</em>
       </header>
       <form className="flex flex-col items-center justify-center gap-4">
         <textarea
@@ -70,21 +82,31 @@ const Home: NextPage = () => {
           onClick={(e) => addIngredient(e)}
           className="border-2 rounded-2xl max-w-2xl p-2 bg-rose-700 text-violet-100 font-bold hover:bg-rose-500"
         >
-          Adicionar Ingrediente
+          ADD INGREDIENT
         </button>
       </form>
 
+      <div className="flex flex-col mt-5 justify-center items-center">
+        <p className="font-mono text-lg underline">
+          You are requesting a recipe using the following ingredients:
+        </p>
+        <br />
+      </div>
+      <div className="flex flex-row items-center justify-center">
       {ingredients.length
         ? ingredients.map((item, index) => (
-            <RecipeTag
-              key={index}
-              ingredient={item.ingredient}
-              id={index}
-              deleteIngredient={deleteIngredient}
-              colorCode={item.colorCode}
-            />
+            <>
+              <RecipeTag
+                ingredient={item.ingredient}
+                customClass="mt-2"
+                index={index}
+                deleteIngredient={deleteIngredient}
+                colorCode={item.colorCode}
+              />
+            </>
           ))
         : null}
+        </div>
     </div>
   );
 };

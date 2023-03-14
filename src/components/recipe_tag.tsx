@@ -3,15 +3,17 @@ import clsx from 'clsx';
 interface RecipeTagProps {
   colorCode: number;
   ingredient: string;
-  id: number,
+  index: number,
+  customClass: string
   deleteIngredient: (param: number) => void;
 }
 
-const spanStyles = 'inline-flex items-center px-2 py-1 mr-2 text-sm font-medium';
+const spanStyles = 'inline-flex items-center px-2 py-1 mr-2 text-lg font-medium font-mono';
 const buttonStyles = 'inline-flex items-center p-0.5 ml-2 text-sm bg-transparent rounded-sm';
 
-export function RecipeTag({ colorCode, ingredient, id, deleteIngredient }: RecipeTagProps) {
+export function RecipeTag({ colorCode, ingredient, index, customClass,deleteIngredient }: RecipeTagProps) {
   return (
+    <div className={customClass}>
     <span
       id={clsx({
         'badge-dismiss-default': colorCode == 1,
@@ -58,7 +60,7 @@ export function RecipeTag({ colorCode, ingredient, id, deleteIngredient }: Recip
           '#badge-dismiss-pink': colorCode == 8
         })}
         aria-label="Remove"
-        onClick={() => deleteIngredient(id)}
+        onClick={() => deleteIngredient(index)}
       >
         <svg
           aria-hidden="true"
@@ -76,5 +78,6 @@ export function RecipeTag({ colorCode, ingredient, id, deleteIngredient }: Recip
         <span className="sr-only">Remove</span>
       </button>
     </span>
+    </div>
   );
 }
