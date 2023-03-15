@@ -11,9 +11,9 @@ interface RecipeTagProps {
 const spanStyles = 'inline-flex items-center px-2 py-1 mr-2 text-lg font-medium font-mono';
 const buttonStyles = 'inline-flex items-center p-0.5 ml-2 text-sm bg-transparent rounded-sm';
 
-export function RecipeTag({ colorCode, ingredient, index, customClass,deleteIngredient }: RecipeTagProps) {
+export function RecipeTag({ colorCode, ingredient, index, customClass, deleteIngredient }: RecipeTagProps) {
   return (
-    <div className={customClass}>
+    <div className={customClass} key={index}>
     <span
       id={clsx({
         'badge-dismiss-default': colorCode == 1,

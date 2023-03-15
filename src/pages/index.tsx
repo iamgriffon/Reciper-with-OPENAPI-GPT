@@ -1,6 +1,8 @@
+import { Navbar } from "@/components/navbar";
 import { RecipeTag } from "@/components/recipe_tag";
 import type { NextPage } from "next";
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, useState } from "react";
+import { fetch } from "@/server/api";
 
 type Ingredient = {
   ingredient: string;
@@ -10,6 +12,7 @@ type Ingredient = {
 const Home: NextPage = () => {
   const [input, setInput] = useState<string>();
   const [ingredients, setIngredients] = useState<Ingredient>([]);
+  const [recipes, setRecipes] = useState<string[]>([]);
 
   function deleteIngredient(index: number) {
     const toBeDeleted = index;
@@ -51,18 +54,29 @@ const Home: NextPage = () => {
     setInput("");
   }
 
-  const handleKeyDown = (
-    event: React.KeyboardEvent<HTMLTextAreaElement>
-  ): void => {
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       addIngredient(event);
     }
-  };
+  }
+
+  async function getRecipes(event: FormEvent) {
+    event.preventDefault();
+    const PROMPTS_TO_API = ingredients.map((i) => i.ingredient);
+    const res: string = await fetch
+      .post("/recipes", PROMPTS_TO_API)
+      .then((res) => res.data.data);
+
+    const recipes = res.split("\n").filter((str) => str !== "." && str !== "");
+    setRecipes(recipes);
+    console.log(recipes);
+  }
 
   return (
     <div>
       <header className="items-center justify-center flex flex-col">
+        <Navbar />
         <h1 className="text-2xl font-bold mb-3">
           Please insert your ingredients in the box
         </h1>
@@ -86,27 +100,43 @@ const Home: NextPage = () => {
         </button>
       </form>
 
-      <div className="flex flex-col mt-5 justify-center items-center">
-        <p className="font-mono text-lg underline">
-          You are requesting a recipe using the following ingredients:
-        </p>
-        <br />
-      </div>
-      <div className="flex flex-row items-center justify-center">
-      {ingredients.length
-        ? ingredients.map((item, index) => (
-            <>
+      {ingredients.length ? (
+        <div className="flex m-2 justify-center items-center">
+          <p className="font-mono text-lg underline">
+            You are requesting a recipe using the following ingredients:
+          </p>
+          <br />
+        </div>
+      ) : null}
+
+      <div className="flex flex-row m-2 items-center justify-center">
+        {ingredients.length
+          ? ingredients.map((item, index) => (
               <RecipeTag
+                key={index}
                 ingredient={item.ingredient}
                 customClass="mt-2"
                 index={index}
                 deleteIngredient={deleteIngredient}
                 colorCode={item.colorCode}
               />
-            </>
-          ))
-        : null}
+            ))
+          : null}
+      </div>
+      <div className="flex flex-col justify-center items-center mt-6">
+        {ingredients.length && !recipes.length ? (
+          <button
+            type="submit"
+            onClick={(e) => getRecipes(e)}
+            className="bg-green-700 hover:bg-green-600 text-white font-bold max-w-3xl p-2 rounded flex justify-center self-center"
+          >
+            Get Recipes
+          </button>
+        ) : null}
+        <div className="max-w-3xl mt-6">
+        {recipes.length ? recipes.map((recipe, index) => <p className="font-mono pb-4" key={index}>{recipe}</p>) : null}
         </div>
+      </div>
     </div>
   );
 };
